@@ -12,7 +12,9 @@ class _RegisterPageState extends State<RegisterPage>{
   final _passwordController = TextEditingController();
   final _nameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _dateController = TextEditingController();
   DateTime selectedDate = DateTime.now();
+  bool _obscureText = true;
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -29,16 +31,22 @@ class _RegisterPageState extends State<RegisterPage>{
   @override
   Widget build(BuildContext context){
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, semanticLabel: "Volver a Log In"),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 24.0),
             children: <Widget>[
-              const SizedBox(height: 100.0),
+              const SizedBox(height: 30.0),
               Column(
                 children: <Widget>[
                   Image.asset('assets/logo_clean.png'),
                   const SizedBox(height: 20.0,),
-                  Text("¡Bienvenido!", style: Theme.of(context).textTheme.titleLarge),
+                  Text("¡Bienvenido a billetin!", style: Theme.of(context).textTheme.titleLarge),
                   const SizedBox(height: 20.0,),
                   Text("A continuación, digita tu información personal", style: Theme.of(context).textTheme.bodyMedium)
                 ],
@@ -54,9 +62,20 @@ class _RegisterPageState extends State<RegisterPage>{
               const SizedBox(height:10),
               const Text("Contraseña"),
               TextFormField(
+                obscureText: _obscureText,
                 controller: _passwordController,
-                decoration: const InputDecoration(
-                    hintText: "Contraseña super secreta"
+                decoration: InputDecoration(
+                  hintText: "Contraseña super secreta",
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureText
+                        ? Icons.visibility_off
+                        : Icons.visibility),
+                    onPressed: (){
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
                 ),
               ),
               const SizedBox(height:10),
@@ -78,6 +97,7 @@ class _RegisterPageState extends State<RegisterPage>{
               const SizedBox(height:10),
               const Text("Fecha de nacimiento"),
               TextFormField(
+                controller: _dateController,
                 decoration: InputDecoration(
                   hintText: [selectedDate.year, selectedDate.month, selectedDate.day].join("-"),
                   suffixIcon: IconButton(
@@ -102,6 +122,7 @@ class _RegisterPageState extends State<RegisterPage>{
                   minimumSize: const Size(double.infinity, 48),
                 ),
               ),
+              const SizedBox(height: 20)
             ],
         ),
       ),

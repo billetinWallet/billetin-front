@@ -82,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
             ElevatedButton(
               child: const Text("Iniciar sesión"),
               onPressed: (){
-                Navigator.pop(context);
+                Navigator.pushReplacementNamed(context, "/home");
               },
               style: ElevatedButton.styleFrom(
                 shape: RoundedRectangleBorder(
