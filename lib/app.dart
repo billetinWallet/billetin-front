@@ -19,7 +19,6 @@ import 'screens/home.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
 import 'screens/transactions.dart';
-import 'screens/movements.dart';
 
 // TODO: Convert ShrineApp to stateful widget (104)
 class billetinApp extends StatefulWidget {
@@ -41,7 +40,7 @@ class _billetinAppState extends State<billetinApp> {
         '/register': (BuildContext context) => const RegisterPage(),
         '/transactions': (BuildContext context) => const TransactionPage(),
       },
-
+      debugShowCheckedModeBanner: false,
       theme: _billetinTheme,
       darkTheme: _billetinDarkTheme,
       themeMode: ThemeMode.light,

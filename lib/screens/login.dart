@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:billetin/content_extension.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -79,18 +81,38 @@ class _LoginPageState extends State<LoginPage> {
               )
             ),
             const SizedBox(height: 40),
-            ElevatedButton(
-              child: const Text("Iniciar sesión"),
-              onPressed: (){
-                Navigator.pushReplacementNamed(context, "/home");
-              },
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  side: BorderSide.none,
+            Mutation(
+                options: MutationOptions(
+                  document: gql(loginUserMutation()),
+                  onError: (exception){
+                    context.showSnackBar("Inicio de sesión fallido, intente nuevamente");
+                  },
+                  onCompleted: (resultData){
+                    if (resultData!=null){
+                      context.showSnackBar("Inicio de sesión exitoso");
+                      print(resultData);
+                      Navigator.popAndPushNamed(context, "/home");
+                    }
+                  },
                 ),
-                minimumSize: const Size(double.infinity, 48),
-              ),
+                builder: (runMutation, result){
+                  if(result != null && result.isLoading){
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  return ElevatedButton(
+                    child: const Text("Iniciar sesión"),
+                    onPressed: (){
+                      loginUser(runMutation);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        side: BorderSide.none,
+                      ),
+                      minimumSize: const Size(double.infinity, 48),
+                    ),
+                  );
+                }
             ),
             const SizedBox(height: 10,),
             Center(
@@ -116,4 +138,28 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+  void loginUser(RunMutation runMutation){
+    final document = _usernameController.text;
+    final password = _passwordController.text;
+    runMutation({
+      "user":{
+        "document_number": document,
+        "password": password
+      },
+    });
+  }
+
+  String loginUserMutation(){
+    return '''
+    mutation CreateToken(\$user: UserRequest!) {
+      createToken(User: \$user) {
+          access_token
+          token_type
+      }
+    }
+    ''';
+  }
+
+
+
 }
