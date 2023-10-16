@@ -22,9 +22,14 @@ import 'screens/transactions.dart';
 import 'screens/movements.dart';
 
 // TODO: Convert ShrineApp to stateful widget (104)
-class billetinApp extends StatelessWidget {
+class billetinApp extends StatefulWidget {
   const billetinApp({Key? key}) : super(key: key);
 
+  @override
+  State<billetinApp> createState() => _billetinAppState();
+}
+
+class _billetinAppState extends State<billetinApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
