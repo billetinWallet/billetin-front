@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:billetin/colors.dart';
+import 'package:billetin/screens/movements.dart';
 import 'package:flutter/material.dart';
 
 import 'screens/home.dart';
@@ -39,6 +40,7 @@ class _billetinAppState extends State<billetinApp> {
         '/home': (BuildContext context) => const HomePage(),
         '/register': (BuildContext context) => const RegisterPage(),
         '/transactions': (BuildContext context) => const TransactionPage(),
+        '/historical': (BuildContext context) => const MovementPage(),
       },
       debugShowCheckedModeBanner: false,
       theme: _billetinTheme,
