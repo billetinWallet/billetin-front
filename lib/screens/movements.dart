@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
@@ -9,7 +11,8 @@ class MovementPage extends StatefulWidget{
 }
 
 class _MovementPageState extends State<MovementPage>{
-  //final List _transactions  = [];
+  List _transactions  = [];
+  int len = 0;
   final int userId = 1;
 
   @override
@@ -34,16 +37,27 @@ class _MovementPageState extends State<MovementPage>{
 
 
           final data = result.data?["movementsByUserId"];
-          print(data);
-
-          return Text("No widget to build");
+          // print(data);
+          // print(data.runtimeType);
+          _transactions = data;
+          return Text("");
         
         }),
         Expanded(
           child: ListView.builder(
-            itemCount: 10,//_transactions.length,
+            itemCount:(_transactions.length),
             itemBuilder:(context, index){
-              return MySquare();
+              if(_transactions[index]['state'] == "A"){
+                return MySquareApproved(
+                  id_movement:_transactions[index]['id_movement'],
+                  amount:_transactions[index]['amount']
+                  
+                );
+              }
+              return  MySquareDeclined(
+                id_movement:_transactions[index]['id_movement'],
+                amount:_transactions[index]['amount']
+              );
             }))
       ]),
     );
@@ -51,14 +65,61 @@ class _MovementPageState extends State<MovementPage>{
 }
 
 
-class MySquare extends StatelessWidget{
+class MySquareApproved extends StatelessWidget{
+  final String id_movement;
+  final int amount;
+
+  MySquareApproved({required this.id_movement, required this.amount});
   @override
   Widget build(BuildContext context){
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Container(
-        height: 200,
+        height: 150,
         color: Colors.green[200],
+        child: Column(
+          children: [
+            Text(
+              id_movement,
+              style:TextStyle(fontSize: 20),
+            ),
+            Text(
+              amount.toString(),
+              style:TextStyle(fontSize: 20),
+            )
+          ],  
+        ),
+        ),
+      );
+  }
+}
+
+class MySquareDeclined extends StatelessWidget{
+  final String id_movement;
+  final int amount;
+
+  MySquareDeclined({required this.id_movement, required this.amount});
+
+
+  @override
+  Widget build(BuildContext context){
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        height: 150,
+        color: Color.fromARGB(255, 240, 72, 63),
+        child:  Column(
+          children: [
+            Text(
+              id_movement,
+              style:TextStyle(fontSize: 20),
+            ),
+            Text(
+              amount.toString(),
+              style:TextStyle(fontSize: 20),
+            )
+          ],  
+        ),
       ),
       );
   }
