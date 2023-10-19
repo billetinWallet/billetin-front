@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:billetin/content_extension.dart';
+import 'package:billetin/screens/home.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -90,8 +91,10 @@ class _LoginPageState extends State<LoginPage> {
                   onCompleted: (resultData){
                     if (resultData!=null){
                       context.showSnackBar("Inicio de sesión exitoso");
-                      print(resultData);
-                      Navigator.popAndPushNamed(context, "/home");
+                      Navigator.pop(context);
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) => HomePage(token: resultData["createToken"]["access_token"]),
+                      ));
                     }
                   },
                 ),
@@ -143,7 +146,7 @@ class _LoginPageState extends State<LoginPage> {
     final password = _passwordController.text;
     runMutation({
       "user":{
-        "document_number": document,
+        "username": document,
         "password": password
       },
     });
@@ -151,8 +154,8 @@ class _LoginPageState extends State<LoginPage> {
 
   String loginUserMutation(){
     return '''
-    mutation CreateToken(\$user: UserRequest!) {
-      createToken(User: \$user) {
+    mutation CreateToken(\$user: Login!) {
+      createToken(login: \$user) {
           access_token
           token_type
       }
