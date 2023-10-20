@@ -13,8 +13,10 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage>{
   final _documentController = TextEditingController();
   final _amountController = TextEditingController();
-  bool tran = false;
-  double saldo = 0;
+  bool isTransaction = false;
+  String targetDocument = "";
+  String amount="";
+  double balance = 0;
   String token="";
   int tx_target=0;
 
@@ -29,22 +31,6 @@ class _HomePageState extends State<HomePage>{
           onPressed: () => print("Menú activado"),
         ),
           title: const Text("billetinWallet"),
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(
-              Icons.search,
-              semanticLabel: "Buscar",
-            ),
-            onPressed: () => print("Buscar"),
-          ),
-          IconButton(
-            icon: const Icon(
-              Icons.tune,
-              semanticLabel: "Filtrar",
-            ),
-            onPressed: () => print("Filtra"),
-          ),
-        ],
       ),
       body: Center(
         child: ListView(
@@ -65,13 +51,17 @@ class _HomePageState extends State<HomePage>{
               options: QueryOptions(
                 document: gql(currentBalance()),
                 variables: {'id_user': JwtDecoder.decode(token)['id']},
+                onError: (exception) {
+                  const Text("Actualizando");
+                }
               ),
               builder: (result, {VoidCallback? refetch, FetchMore? fetchMore}) {
-                if (result.hasException) {
-                  return const Center(child: Text("Error"));
+                if (result.isLoading){
+                  return CircularProgressIndicator();
                 }
-                saldo = result.data?["balanceByUserId"]["balance"].toDouble();
-                return Center(child: Text(saldo.toString()+" COP", style: TextStyle(fontSize: 50)));
+                balance = result.data?["balanceByUserId"]["balance"].toDouble();
+                print(balance);
+                return Center(child: Text(balance.toString()+" COP", style: TextStyle(fontSize: 50)));
               },
             ),
             const SizedBox(height: 300),
@@ -126,26 +116,14 @@ class _HomePageState extends State<HomePage>{
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                if(_documentController.text!="")
-                                Query(
-                                  options: QueryOptions(
-                                    document: gql(findIdQuery()),
-                                    variables: {'document_number': int.parse(_documentController.text)},
-                                  ),
-                                  builder: (result, {VoidCallback? refetch, FetchMore? fetchMore}) {
-                                    if (result.hasException) {
-                                      return const Center(child: Text("Error"));
-                                    }
-                                    tx_target = result.data?["getUserId"]["id_user"];
-                                    print(tx_target);
-                                    return const SizedBox();
-                                  },
-                                ),
                                 Mutation(
                                     options: MutationOptions(
                                       document: gql(createTransactionMutation()),
                                       onError: (exception){
                                         context.showSnackBar("Transacción fallida, revise e intente nuevamente");
+                                        setState(() {
+                                          isTransaction = false;
+                                        });
                                       },
                                       onCompleted: (resultData){
                                         if (resultData!=null){
@@ -154,6 +132,7 @@ class _HomePageState extends State<HomePage>{
                                           setState(() {
                                             _documentController.clear();
                                             _amountController.clear();
+                                            isTransaction = false;
                                           });
                                           Navigator.pop(context);
                                         }
@@ -167,7 +146,9 @@ class _HomePageState extends State<HomePage>{
                                         child: const Text("Transferir!"),
                                         onPressed: () {
                                           setState(() {
-                                            tran = true;
+                                            targetDocument = _documentController.text;
+                                            amount = _amountController.text;
+                                            isTransaction = true;
                                           });
                                           createTransaction(runMutation);
                                         },
@@ -196,9 +177,32 @@ class _HomePageState extends State<HomePage>{
                     child: const Text("Mis movimientos")
                 ),
               ],
-            )
-
-
+            ),
+            if(isTransaction)
+            Query(
+              key: UniqueKey(),
+              options: QueryOptions(
+                document: gql(findIdQuery()),
+                variables: {'document_number': int.parse(targetDocument)},
+                onError: (exception){
+                  context.showSnackBar("Problema al encontrar el usuario destino");
+                },
+                onComplete: (resultData) {
+                  if (resultData != null) {
+                    context.showSnackBar("El usuario destino existe");
+                    print(resultData);
+                    tx_target = resultData["getUserId"]["id_user"];
+                    print(tx_target);
+                  }
+                }
+              ),
+              builder: (result, {VoidCallback? refetch, FetchMore? fetchMore}) {
+                if(result.isLoading){
+                  return const Center(child: Text("Verificando usuario destino"));
+                }
+                return const SizedBox();
+              },
+            ),
           ],
         ),
       ),
@@ -207,7 +211,7 @@ class _HomePageState extends State<HomePage>{
   }
 
   void createTransaction(RunMutation runMutation){
-    final amount = double.parse(_amountController.text);
+    final amount = double.parse(this.amount);
     runMutation({
       "internal_transaction":{
         "source_account": JwtDecoder.decode(token)["id"],
