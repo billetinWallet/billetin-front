@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'screens/home.dart';
 import 'screens/login.dart';
 import 'screens/register.dart';
-import 'screens/transactions.dart';
 
 // TODO: Convert ShrineApp to stateful widget (104)
 class billetinApp extends StatefulWidget {
@@ -30,6 +29,7 @@ class billetinApp extends StatefulWidget {
 }
 
 class _billetinAppState extends State<billetinApp> {
+  String token="";
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -37,9 +37,8 @@ class _billetinAppState extends State<billetinApp> {
       initialRoute: '/login',
       routes: {
         '/login': (BuildContext context) => const LoginPage(),
-        '/home': (BuildContext context) => const HomePage(),
+        '/home': (BuildContext context) => HomePage(token: token),
         '/register': (BuildContext context) => const RegisterPage(),
-        '/transactions': (BuildContext context) => const TransactionPage(),
         '/historical': (BuildContext context) => const MovementPage(),
       },
       debugShowCheckedModeBanner: false,
@@ -63,7 +62,7 @@ ThemeData _buildBilletinTheme(){
       error: er,
     ),
 
-    textTheme: _buildBilletinTextTheme(base.textTheme),
+    //textTheme: _buildBilletinTextTheme(base.textTheme),
     textSelectionTheme: const TextSelectionThemeData(
       selectionColor: v3
     ),
@@ -83,7 +82,7 @@ ThemeData _buildBilletinDarkTheme(){
       error: er,
     ),
 
-    textTheme: _buildBilletinTextTheme(base.textTheme),
+    //textTheme: _buildBilletinTextTheme(base.textTheme),
     textSelectionTheme: const TextSelectionThemeData(
         selectionColor: v3
     ),
