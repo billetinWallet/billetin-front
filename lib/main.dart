@@ -7,7 +7,7 @@ void main() async{
   await initHiveForFlutter();
 
   final GraphQLClient graphQLClient = GraphQLClient(
-    link: HttpLink("https://api-gw-rahp.onrender.com/graphql?"),
+    link: HttpLink("http://52.186.171.160:5000/graphql?"),
     cache: GraphQLCache(
       store: HiveStore(),
     ),
