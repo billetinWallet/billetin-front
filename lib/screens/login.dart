@@ -75,7 +75,14 @@ class _LoginPageState extends State<LoginPage> {
             Align(
               alignment: Alignment.centerRight,
               child: TextButton(
-                onPressed: () => print("password recovery not implemented yet."),
+                onPressed: () {
+                  if (_usernameController.text != ""){
+                    context.showSnackBar("Usuario ${_usernameController.text}, un link de recuperación se ha enviado a su email.");
+                  } else{
+                    context.showSnackBar("Primero, digite su número de documento");
+                  }
+
+                },
                 child: const Text(
                   "Olvidé mi contraseña"
                 ),

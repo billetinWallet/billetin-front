@@ -30,7 +30,15 @@ class _HomePageState extends State<HomePage>{
           icon: const Icon(Icons.menu, semanticLabel: "Menú",),
           onPressed: () => print("Menú activado"),
         ),
-          title: const Text("billetinWallet"),
+        title: const Text("billetinWallet"),
+        actions: <Widget>[
+          IconButton(icon: Icon(Icons.logout), onPressed: (){
+              this.token = "";
+              Navigator.pop(context);
+              Navigator.pushNamed(context, "/login");
+            },
+          ),
+        ],
       ),
       body: Center(
         child: ListView(
@@ -50,7 +58,7 @@ class _HomePageState extends State<HomePage>{
               key: UniqueKey(),
               options: QueryOptions(
                 document: gql(currentBalance()),
-                variables: {'id_user': JwtDecoder.decode(token)['id']},
+                variables: {'token':token, 'id_user': JwtDecoder.decode(token)['id']},
                 onError: (exception) {
                   const Text("Actualizando");
                 }
@@ -183,7 +191,7 @@ class _HomePageState extends State<HomePage>{
               key: UniqueKey(),
               options: QueryOptions(
                 document: gql(findIdQuery()),
-                variables: {'document_number': int.parse(targetDocument)},
+                variables: {'token':token, 'document_number': int.parse(targetDocument)},
                 onError: (exception){
                   context.showSnackBar("Problema al encontrar el usuario destino");
                 },
@@ -213,6 +221,7 @@ class _HomePageState extends State<HomePage>{
   void createTransaction(RunMutation runMutation){
     final amount = double.parse(this.amount);
     runMutation({
+      "token": token,
       "internal_transaction":{
         "source_account": JwtDecoder.decode(token)["id"],
         "target_account": tx_target,
@@ -221,8 +230,8 @@ class _HomePageState extends State<HomePage>{
   }
   String findIdQuery() {
     return '''
-    query GetUserId (\$document_number: Int!){
-      getUserId(document_number: \$document_number) {
+    query GetUserId (\$token: String!, \$document_number: Int!){
+      getUserId(token: \$token, document_number: \$document_number) {
           id_user
       }
     }
@@ -232,8 +241,8 @@ class _HomePageState extends State<HomePage>{
 
   String currentBalance(){
     return '''
-    query BalanceByUserId (\$id_user: Int!){
-    balanceByUserId(id_user: \$id_user) {
+    query BalanceByUserId (\$token: String!, \$id_user: Int!){
+    balanceByUserId(token: \$token, id_user: \$id_user) {
         id_balance
         balance
         update_time
@@ -244,8 +253,9 @@ class _HomePageState extends State<HomePage>{
 
   String createTransactionMutation(){
     return '''
-    mutation CreateInternalTransaction(\$internal_transaction: InternalTransactionInput!) {
+    mutation CreateInternalTransaction(\$token: String!, \$internal_transaction: InternalTransactionInput!) {
     createInternalTransaction(
+        token: \$token , 
         internal_transaction: \$internal_transaction
     ) {
         id_internal_transaction
